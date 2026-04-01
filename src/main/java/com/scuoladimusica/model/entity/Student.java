@@ -2,22 +2,24 @@ package com.scuoladimusica.model.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "students")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Student {
+@SuperBuilder
+public class Student extends SuperUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,26 +28,6 @@ public class Student {
     @NotBlank(message = "La matricola non può essere vuota")
     @Column(unique = true, nullable = false)
     private String matricola;
-
-    @NotBlank(message = "Il codice fiscale non può essere vuoto")
-    @Size(min = 16, max = 16, message = "Il codice fiscale deve essere di 16 caratteri")
-    @Column(nullable = false)
-    private String cf;
-
-    @NotBlank(message = "Il nome non può essere vuoto")
-    @Column(nullable = false)
-    private String nome;
-
-    @NotBlank(message = "Il cognome non può essere vuoto")
-    @Column(nullable = false)
-    private String cognome;
-
-    @NotNull(message = "La data di nascita è obbligatoria")
-    @Past(message = "La data di nascita deve essere nel passato")
-    @Column(nullable = false)
-    private LocalDate dataNascita;
-
-    private String telefono;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -56,24 +38,14 @@ public class Student {
     @Builder.Default
     private List<Enrollment> enrollments = new ArrayList<>();
 
-    /**
-     * Restituisce il nome completo dello studente.
-     */
     public String getNomeCompleto() {
-        return nome + " " + cognome;
+        return getNome() + " " + getCognome();
     }
 
-    /**
-     * Restituisce il numero di corsi a cui lo studente è iscritto.
-     */
     public int getNumeroCorsiFrequentati() {
         return enrollments.size();
     }
 
-    /**
-     * Calcola la media dei voti registrati (esclude le iscrizioni senza voto).
-     * Restituisce 0 se non ci sono voti.
-     */
     public double getMediaVoti() {
         List<Integer> voti = enrollments.stream()
                 .map(Enrollment::getVotoFinale)

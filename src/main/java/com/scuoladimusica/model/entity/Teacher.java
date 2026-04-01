@@ -6,18 +6,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.EqualsAndHashCode;
+import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "teachers")
 @Data
+@EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Teacher {
+@SuperBuilder
+public class Teacher extends SuperUser {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,26 +28,6 @@ public class Teacher {
     @NotBlank(message = "La matricola insegnante non può essere vuota")
     @Column(unique = true, nullable = false)
     private String matricolaInsegnante;
-
-    @NotBlank(message = "Il codice fiscale non può essere vuoto")
-    @Size(min = 16, max = 16, message = "Il codice fiscale deve essere di 16 caratteri")
-    @Column(nullable = false)
-    private String cf;
-
-    @NotBlank(message = "Il nome non può essere vuoto")
-    @Column(nullable = false)
-    private String nome;
-
-    @NotBlank(message = "Il cognome non può essere vuoto")
-    @Column(nullable = false)
-    private String cognome;
-
-    @NotNull(message = "La data di nascita è obbligatoria")
-    @Past(message = "La data di nascita deve essere nel passato")
-    @Column(nullable = false)
-    private LocalDate dataNascita;
-
-    private String telefono;
 
     @NotNull(message = "Lo stipendio è obbligatorio")
     @Positive(message = "Lo stipendio deve essere positivo")
@@ -65,10 +47,7 @@ public class Teacher {
     @Builder.Default
     private List<Course> courses = new ArrayList<>();
 
-    /**
-     * Restituisce il nome completo dell'insegnante.
-     */
     public String getNomeCompleto() {
-        return nome + " " + cognome;
+        return getNome() + " " + getCognome();
     }
 }
