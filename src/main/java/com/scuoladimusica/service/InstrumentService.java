@@ -24,14 +24,22 @@ import java.util.List;
 @Transactional
 public class InstrumentService {
 
-    @Autowired
+    //@Autowired
     private InstrumentRepository instrumentRepository;
 
-    @Autowired
+    //@Autowired
     private LoanRepository loanRepository;
 
-    @Autowired
+    //@Autowired
     private StudentRepository studentRepository;
+
+    @Autowired
+    public InstrumentService(InstrumentRepository instrumentRepository, LoanRepository loanRepository,
+            StudentRepository studentRepository) {
+        this.instrumentRepository = instrumentRepository;
+        this.loanRepository = loanRepository;
+        this.studentRepository = studentRepository;
+    }
 
     private InstrumentMapper instrumentMapper = new InstrumentMapper();
     private LoanMapper loanMapper = new LoanMapper();
