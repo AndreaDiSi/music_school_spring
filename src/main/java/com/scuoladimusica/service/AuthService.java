@@ -27,6 +27,8 @@ import java.util.Set;
 @Service
 public class AuthService {
 
+    private static final String RUOLO_NON_TROVATO = "Errore: Ruolo non trovato.";
+
     private AuthenticationManager authenticationManager;
 
     private UserRepository userRepository;
@@ -81,24 +83,24 @@ public class AuthService {
 
         if (strRoles == null || strRoles.isEmpty()) {
             Role studentRole = roleRepository.findByName(ERole.ROLE_STUDENT)
-                    .orElseThrow(() -> new RuntimeException("Errore: Ruolo non trovato."));
+                    .orElseThrow(() -> new RuntimeException(RUOLO_NON_TROVATO));
             roles.add(studentRole);
         } else {
             strRoles.forEach(role -> {
                 switch (role) {
                     case "admin" -> {
                         Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Errore: Ruolo non trovato."));
+                                .orElseThrow(() -> new RuntimeException(RUOLO_NON_TROVATO));
                         roles.add(adminRole);
                     }
                     case "teacher" -> {
                         Role teacherRole = roleRepository.findByName(ERole.ROLE_TEACHER)
-                                .orElseThrow(() -> new RuntimeException("Errore: Ruolo non trovato."));
+                                .orElseThrow(() -> new RuntimeException(RUOLO_NON_TROVATO));
                         roles.add(teacherRole);
                     }
                     default -> {
                         Role studentRole = roleRepository.findByName(ERole.ROLE_STUDENT)
-                                .orElseThrow(() -> new RuntimeException("Errore: Ruolo non trovato."));
+                                .orElseThrow(() -> new RuntimeException(RUOLO_NON_TROVATO));
                         roles.add(studentRole);
                     }
                 }

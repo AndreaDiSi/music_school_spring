@@ -25,6 +25,8 @@ import java.util.List;
 @Transactional
 public class CourseService {
 
+    private static final String CORSO_NOT_FOUND = "Course not Found";
+
     private CourseRepository courseRepository;
 
     private LessonRepository lessonRepository;
@@ -48,30 +50,24 @@ public class CourseService {
     @Transactional
     public CourseResponse createCourse(CourseRequest request) {
 
-        if(courseRepository.existsByCodiceCorso(request.codiceCorso())){
+        if (courseRepository.existsByCodiceCorso(request.codiceCorso())) {
             throw new DuplicateResourceException("Un corso con questo codice già esiste!");
         }
 
-        if(request.dataFine().isBefore(request.dataInizio()) || request.dataFine().equals(request.dataInizio())){
+        if (request.dataFine().isBefore(request.dataInizio()) || request.dataFine().equals(request.dataInizio())) {
             throw new BusinessRuleException("Data inizio viene dopo la data di fine!");
         }
-        
+
         Course newCourse = courseMapper.toEntity(request);
-
         courseRepository.save(newCourse);
-
         return courseMapper.toResponse(newCourse);
     }
 
     @Transactional(readOnly = true)
     public CourseResponse getCourseByCode(String codiceCorso) {
-        var corso = courseRepository.findByCodiceCorso(codiceCorso);
-        if(corso.isPresent()){
-            var newCorso = courseRepository.save(corso.get());
-            return courseMapper.toResponse(newCorso);
-        } else {
-            throw new ResourceNotFoundException("Corso with this Codice Corso Not found: " + codiceCorso);
-        }
+        var corso = courseRepository.findByCodiceCorso(codiceCorso)
+                .orElseThrow(() -> new ResourceNotFoundException("Corso with this Codice Corso Not found: " + codiceCorso));
+        return courseMapper.toResponse(corso);
     }
 
     @Transactional(readOnly = true)
@@ -84,84 +80,63 @@ public class CourseService {
         return courseMapper.toCourseResponses(courseRepository.findByOnlineTrue());
     }
 
-    //a quanto pare se metti transactional, non serve il save alla fine perchè ci pensa il persistance context
+    // se metti @Transactional, non serve il save alla fine perché ci pensa il persistence context
     @Transactional
     public CourseResponse updateCourse(String codiceCorso, CourseRequest request) {
+        var corso = courseRepository.findByCodiceCorso(codiceCorso)
+                .orElseThrow(() -> new ResourceNotFoundException(CORSO_NOT_FOUND));
 
-        if(courseRepository.existsByCodiceCorso(codiceCorso)){
+        corso.setNome(request.nome());
+        corso.setDataInizio(request.dataInizio());
+        corso.setDataFine(request.dataFine());
+        corso.setCostoOrario(request.costoOrario());
+        corso.setTotaleOre(request.totaleOre());
+        corso.setOnline(request.online());
+        corso.setLivello(request.livello());
 
-            var corso = courseRepository.findByCodiceCorso(codiceCorso).get();
-
-            corso.setNome(request.nome());
-            corso.setDataInizio(request.dataInizio());
-            corso.setDataFine(request.dataFine());
-            corso.setCostoOrario(request.costoOrario());
-            corso.setTotaleOre(request.totaleOre());
-            corso.setOnline(request.online());
-            corso.setLivello(request.livello());
-
-            if (corso.getDataFine().isBefore(corso.getDataInizio())){
-                throw new BusinessRuleException("Data fine non può venire prima di data inzio");
-            }
-
-           return courseMapper.toResponse(corso);
-
-        } else {
-            throw new ResourceNotFoundException("Course not Found");
+        if (corso.getDataFine().isBefore(corso.getDataInizio())) {
+            throw new BusinessRuleException("Data fine non può venire prima di data inzio");
         }
+
+        return courseMapper.toResponse(corso);
     }
 
     public void deleteCourse(String codiceCorso) {
-        if(courseRepository.existsByCodiceCorso(codiceCorso)){
-            courseRepository.delete(courseRepository.findByCodiceCorso(codiceCorso).get());
-        } else {
-            throw new ResourceNotFoundException("Course not Found");
-        }
-        
+        var corso = courseRepository.findByCodiceCorso(codiceCorso)
+                .orElseThrow(() -> new ResourceNotFoundException(CORSO_NOT_FOUND));
+        courseRepository.delete(corso);
     }
 
     @Transactional
     public LessonResponse addLesson(String codiceCorso, LessonRequest request) {
+        var corso = courseRepository.findByCodiceCorso(codiceCorso)
+                .orElseThrow(() -> new ResourceNotFoundException(CORSO_NOT_FOUND));
+        var lesson = lessonMapper.toEntity(request);
+        lesson.setCourse(corso);
 
-        if (courseRepository.existsByCodiceCorso(codiceCorso)) {
-            var corso = courseRepository.findByCodiceCorso(codiceCorso).get();
-            var lesson = lessonMapper.toEntity(request);
-            lesson.setCourse(corso);
-
-            // prima controlli
-            if (lessonRepository.existsByCourseIdAndNumero(corso.getId(), request.numero())) {
-                throw new DuplicateResourceException("Lesson with this course id already exists");
-            }
-
-            // poi salvi
-            var savedLesson = lessonRepository.save(lesson);
-            corso.getLessons().add(savedLesson);
-
-            return lessonMapper.toResponse(savedLesson);
-
-        } else {
-            throw new ResourceNotFoundException("Course not found");
+        // prima controlli
+        if (lessonRepository.existsByCourseIdAndNumero(corso.getId(), request.numero())) {
+            throw new DuplicateResourceException("Lesson with this course id already exists");
         }
+
+        // poi salvi
+        var savedLesson = lessonRepository.save(lesson);
+        corso.getLessons().add(savedLesson);
+
+        return lessonMapper.toResponse(savedLesson);
     }
 
     @Transactional
     public void addInstrumentToCourse(String codiceCorso, String codiceStrumento) {
+        var corso = courseRepository.findByCodiceCorso(codiceCorso)
+                .orElseThrow(() -> new ResourceNotFoundException("corso not found"));
+        var strumento = instrumentRepository.findByCodiceStrumento(codiceStrumento)
+                .orElseThrow(() -> new ResourceNotFoundException("instrument not found"));
 
-        if(instrumentRepository.existsByCodiceStrumento(codiceStrumento)){
-            if(courseRepository.existsByCodiceCorso(codiceCorso)){
-                var corso = courseRepository.findByCodiceCorso(codiceCorso).get();
-                var strumento = instrumentRepository.findByCodiceStrumento(codiceStrumento).get();
-                var strumentiCorso = corso.getInstruments();
-                if(!strumentiCorso.contains(strumento)){
-                    strumentiCorso.add(strumento);
-                }else{
-                    throw new DuplicateResourceException("Strumento already in course instruments");
-                }
-            } else {
-                throw new ResourceNotFoundException("corso not found");
-            }
+        if (!corso.getInstruments().contains(strumento)) {
+            corso.getInstruments().add(strumento);
         } else {
-            throw new ResourceNotFoundException("instrument not found");
+            throw new DuplicateResourceException("Strumento already in course instruments");
         }
     }
 }

@@ -37,32 +37,16 @@ public class CourseController {
         return ResponseEntity.ok(courseService.getAllCourses());
     }
 
-
     @GetMapping("/online")
     public ResponseEntity<List<CourseResponse>> getOnlineCourses() {
         return ResponseEntity.ok(courseService.getOnlineCourses());
     }
 
-    /**
-     * TODO: GET /api/courses/{codiceCorso} - Recuperare un corso per codice.
-     *
-     * Requisiti:
-     * - Tutti gli utenti autenticati
-     * - Restituire 200 OK con la CourseResponse
-     */
     @GetMapping("/{codiceCorso}")
     public ResponseEntity<CourseResponse> getCourse(@PathVariable String codiceCorso) {
         return ResponseEntity.ok(courseService.getCourseByCode(codiceCorso));
     }
 
-    /**
-     * TODO: PUT /api/courses/{codiceCorso} - Aggiornare un corso.
-     *
-     * Requisiti:
-     * - Solo ADMIN e TEACHER possono aggiornare
-     * - Validare la request
-     * - Restituire 200 OK con la CourseResponse aggiornata
-     */
     @PutMapping("/{codiceCorso}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<CourseResponse> updateCourse(
@@ -71,13 +55,6 @@ public class CourseController {
         return ResponseEntity.ok(courseService.updateCourse(codiceCorso, request));
     }
 
-    /**
-     * TODO: DELETE /api/courses/{codiceCorso} - Eliminare un corso.
-     *
-     * Requisiti:
-     * - Solo ADMIN può eliminare
-     * - Restituire 204 NO CONTENT
-     */
     @DeleteMapping("/{codiceCorso}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCourse(@PathVariable String codiceCorso) {
@@ -85,14 +62,6 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * TODO: POST /api/courses/{codiceCorso}/lessons - Aggiungere una lezione.
-     *
-     * Requisiti:
-     * - Solo ADMIN e TEACHER possono aggiungere lezioni
-     * - Validare la request
-     * - Restituire 201 CREATED con la LessonResponse
-     */
     @PostMapping("/{codiceCorso}/lessons")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<LessonResponse> addLesson(
@@ -101,13 +70,6 @@ public class CourseController {
         return ResponseEntity.status(HttpStatus.CREATED).body(courseService.addLesson(codiceCorso, request));
     }
 
-    /**
-     * TODO: POST /api/courses/{codiceCorso}/instruments/{codiceStrumento} - Aggiungere strumento.
-     *
-     * Requisiti:
-     * - Solo ADMIN può aggiungere strumenti ai corsi
-     * - Restituire 200 OK con MessageResponse("Strumento aggiunto al corso")
-     */
     @PostMapping("/{codiceCorso}/instruments/{codiceStrumento}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MessageResponse> addInstrument(
@@ -116,5 +78,4 @@ public class CourseController {
         courseService.addInstrumentToCourse(codiceCorso, codiceStrumento);
         return ResponseEntity.ok(new MessageResponse("Strumento aggiunto al corso"));
     }
-    
 }

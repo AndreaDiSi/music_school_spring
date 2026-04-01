@@ -24,14 +24,6 @@ public class EnrollmentController {
         this.enrollmentService = enrollmentService;
     }
 
-    /**
-     * TODO: POST /api/enrollments - Iscrivere uno studente a un corso.
-     *
-     * Requisiti:
-     * - ADMIN, TEACHER e STUDENT possono iscrivere
-     * - Validare la request con @Valid
-     * - Restituire 201 CREATED con la EnrollmentResponse
-     */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER') or hasRole('STUDENT')")
     public ResponseEntity<EnrollmentResponse> enrollStudent(
@@ -40,14 +32,6 @@ public class EnrollmentController {
                 enrollmentService.enrollStudent(request.matricolaStudente(), request.codiceCorso(), request.annoIscrizione()));
     }
 
-    /**
-     * TODO: POST /api/enrollments/{matricola}/{codiceCorso}/vote - Registrare voto.
-     *
-     * Requisiti:
-     * - Solo ADMIN e TEACHER possono registrare voti
-     * - Validare la request con @Valid
-     * - Restituire 200 OK con la EnrollmentResponse aggiornata
-     */
     @PostMapping("/{matricola}/{codiceCorso}/vote")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<EnrollmentResponse> registerVote(
@@ -57,13 +41,6 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.registerVote(matricola, codiceCorso, request.voto()));
     }
 
-    /**
-     * TODO: GET /api/enrollments/student/{matricola} - Iscrizioni di uno studente.
-     *
-     * Requisiti:
-     * - ADMIN e TEACHER possono vedere le iscrizioni di qualsiasi studente
-     * - Restituire 200 OK con la lista di EnrollmentResponse
-     */
     @GetMapping("/student/{matricola}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<List<EnrollmentResponse>> getEnrollmentsByStudent(
@@ -71,13 +48,6 @@ public class EnrollmentController {
         return ResponseEntity.ok(enrollmentService.getEnrollmentsByStudent(matricola));
     }
 
-    /**
-     * TODO: GET /api/enrollments/course/{codiceCorso} - Iscrizioni per un corso.
-     *
-     * Requisiti:
-     * - ADMIN e TEACHER possono vedere le iscrizioni per corso
-     * - Restituire 200 OK con la lista di EnrollmentResponse
-     */
     @GetMapping("/course/{codiceCorso}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<List<EnrollmentResponse>> getEnrollmentsByCourse(

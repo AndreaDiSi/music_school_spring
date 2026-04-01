@@ -25,67 +25,29 @@ public class StudentController {
         this.studentService = studentService;
     }
 
-    /**
-     * TODO: POST /api/students - Creare un nuovo studente.
-     *
-     * Requisiti:
-     * - Solo ADMIN e TEACHER possono creare studenti
-     * - Validare la request con @Valid
-     * - Restituire 201 CREATED con la StudentResponse
-     * - Chiamare studentService.createStudent(request)
-     */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<StudentResponse> createStudent(@Valid @RequestBody StudentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(studentService.createStudent(request));
     }
 
-    /**
-     * TODO: GET /api/students - Recuperare tutti gli studenti.
-     *
-     * Requisiti:
-     * - Solo ADMIN e TEACHER possono vedere tutti gli studenti
-     * - Restituire 200 OK con la lista di StudentResponse
-     */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<List<StudentResponse>> getAllStudents() {
         return ResponseEntity.ok(studentService.getAllStudents());
     }
 
-    /**
-     * TODO: GET /api/students/{matricola} - Recuperare uno studente per matricola.
-     *
-     * Requisiti:
-     * - Tutti gli utenti autenticati possono cercare uno studente
-     * - Restituire 200 OK con la StudentResponse
-     */
     @GetMapping("/{matricola}")
     public ResponseEntity<StudentResponse> getStudent(@PathVariable String matricola) {
         return ResponseEntity.ok(studentService.getStudentByMatricola(matricola));
     }
 
-    /**
-     * TODO: GET /api/students/livello/{livello} - Filtrare studenti per livello.
-     *
-     * Requisiti:
-     * - Solo ADMIN e TEACHER possono filtrare
-     * - Restituire 200 OK con la lista filtrata
-     */
     @GetMapping("/livello/{livello}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<List<StudentResponse>> getStudentsByLivello(@PathVariable Livello livello) {
         return ResponseEntity.ok(studentService.getStudentsByLivello(livello));
     }
 
-    /**
-     * TODO: PUT /api/students/{matricola} - Aggiornare uno studente.
-     *
-     * Requisiti:
-     * - Solo ADMIN può aggiornare
-     * - Validare la request
-     * - Restituire 200 OK con la StudentResponse aggiornata
-     */
     @PutMapping("/{matricola}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<StudentResponse> updateStudent(
@@ -94,13 +56,6 @@ public class StudentController {
         return ResponseEntity.ok(studentService.updateStudent(matricola, request));
     }
 
-    /**
-     * TODO: DELETE /api/students/{matricola} - Eliminare uno studente.
-     *
-     * Requisiti:
-     * - Solo ADMIN può eliminare
-     * - Restituire 204 NO CONTENT
-     */
     @DeleteMapping("/{matricola}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteStudent(@PathVariable String matricola) {
@@ -108,13 +63,6 @@ public class StudentController {
         return ResponseEntity.noContent().build();
     }
 
-    /**
-     * TODO: GET /api/students/{matricola}/report - Report dettagliato di uno studente.
-     *
-     * Requisiti:
-     * - ADMIN e TEACHER possono vedere il report
-     * - Restituire 200 OK con StudentReportResponse
-     */
     @GetMapping("/{matricola}/report")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<StudentReportResponse> getStudentReport(@PathVariable String matricola) {

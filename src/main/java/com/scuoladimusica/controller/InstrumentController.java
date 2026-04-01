@@ -26,14 +26,6 @@ public class InstrumentController {
         this.instrumentService = instrumentService;
     }
 
-    /**
-     * TODO: POST /api/instruments - Creare un nuovo strumento.
-     *
-     * Requisiti:
-     * - Solo ADMIN può creare strumenti
-     * - Validare la request con @Valid
-     * - Restituire 201 CREATED con la InstrumentResponse
-     */
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<InstrumentResponse> createInstrument(
@@ -41,50 +33,21 @@ public class InstrumentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(instrumentService.createInstrument(request));
     }
 
-    /**
-     * TODO: GET /api/instruments - Recuperare tutti gli strumenti.
-     *
-     * Requisiti:
-     * - Tutti gli utenti autenticati
-     * - Restituire 200 OK con la lista
-     */
     @GetMapping
     public ResponseEntity<List<InstrumentResponse>> getAllInstruments() {
         return ResponseEntity.ok(instrumentService.getAllInstruments());
     }
 
-    /**
-     * TODO: GET /api/instruments/available - Recuperare strumenti disponibili.
-     *
-     * Requisiti:
-     * - Tutti gli utenti autenticati
-     * - Restituire 200 OK con la lista filtrata
-     */
     @GetMapping("/available")
     public ResponseEntity<List<InstrumentResponse>> getAvailableInstruments() {
         return ResponseEntity.ok(instrumentService.getAvailableInstruments());
     }
 
-    /**
-     * TODO: GET /api/instruments/{codiceStrumento} - Recuperare uno strumento.
-     *
-     * Requisiti:
-     * - Tutti gli utenti autenticati
-     * - Restituire 200 OK con la InstrumentResponse
-     */
     @GetMapping("/{codiceStrumento}")
     public ResponseEntity<InstrumentResponse> getInstrument(@PathVariable String codiceStrumento) {
         return ResponseEntity.ok(instrumentService.getInstrumentByCode(codiceStrumento));
     }
 
-    /**
-     * TODO: POST /api/instruments/{codiceStrumento}/loan - Prestare strumento.
-     *
-     * Requisiti:
-     * - Solo ADMIN e TEACHER possono prestare strumenti
-     * - Validare la request con @Valid
-     * - Restituire 201 CREATED con la LoanResponse
-     */
     @PostMapping("/{codiceStrumento}/loan")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<LoanResponse> loanInstrument(
@@ -94,14 +57,6 @@ public class InstrumentController {
                 instrumentService.loanToStudent(codiceStrumento, request.matricolaStudente(), request.dataInizio()));
     }
 
-    /**
-     * TODO: POST /api/instruments/{codiceStrumento}/return - Restituire strumento.
-     *
-     * Requisiti:
-     * - Solo ADMIN e TEACHER possono gestire restituzioni
-     * - Validare la request con @Valid
-     * - Restituire 200 OK con la LoanResponse
-     */
     @PostMapping("/{codiceStrumento}/return")
     @PreAuthorize("hasRole('ADMIN') or hasRole('TEACHER')")
     public ResponseEntity<LoanResponse> returnInstrument(

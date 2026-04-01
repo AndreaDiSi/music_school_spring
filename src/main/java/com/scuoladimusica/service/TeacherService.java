@@ -19,6 +19,8 @@ import java.util.List;
 @Transactional
 public class TeacherService {
 
+    private static final String INSEGNANTE_NOT_FOUND = "Insegnante with this matricola not found: ";
+
     private TeacherRepository teacherRepository;
 
     private CourseRepository courseRepository;
@@ -52,12 +54,9 @@ public class TeacherService {
 
     @Transactional(readOnly = true)
     public TeacherResponse getTeacherByMatricola(String matricola) {
-        var insegnante = teacherRepository.findByMatricolaInsegnante(matricola);
-        if(insegnante.isPresent()){
-            return teacherMapper.toResponse(insegnante.get());
-        } else {
-            throw new ResourceNotFoundException("Insegnante with this matricola not found: " + matricola);
-        }
+        var insegnante = teacherRepository.findByMatricolaInsegnante(matricola)
+                .orElseThrow(() -> new ResourceNotFoundException(INSEGNANTE_NOT_FOUND + matricola));
+        return teacherMapper.toResponse(insegnante);
     }
 
     @Transactional(readOnly = true)
@@ -68,7 +67,7 @@ public class TeacherService {
     @Transactional
     public TeacherResponse updateTeacher(String matricola, TeacherRequest request) {
         var insegnante = teacherRepository.findByMatricolaInsegnante(matricola)
-                .orElseThrow(() -> new ResourceNotFoundException("Insegnante with this matricola not found: " + matricola));
+                .orElseThrow(() -> new ResourceNotFoundException(INSEGNANTE_NOT_FOUND + matricola));
 
         insegnante.setNome(request.nome());
         insegnante.setCognome(request.cognome());
@@ -82,30 +81,23 @@ public class TeacherService {
 
     public void deleteTeacher(String matricola) {
         var insegnante = teacherRepository.findByMatricolaInsegnante(matricola)
-                .orElseThrow(() -> new ResourceNotFoundException("Insegnante with this matricola not found: " + matricola));
+                .orElseThrow(() -> new ResourceNotFoundException(INSEGNANTE_NOT_FOUND + matricola));
         teacherRepository.delete(insegnante);
     }
 
     @Transactional
     public void assignCourse(String matricolaInsegnante, String codiceCorso) {
 
-        if(teacherRepository.existsByMatricolaInsegnante(matricolaInsegnante)){
-            if(courseRepository.existsByCodiceCorso(codiceCorso)){
-                var insegnante = teacherRepository.findByMatricolaInsegnante(matricolaInsegnante).get();
-                var corso = courseRepository.findByCodiceCorso(codiceCorso).get();
+        var insegnante = teacherRepository.findByMatricolaInsegnante(matricolaInsegnante)
+                .orElseThrow(() -> new ResourceNotFoundException("insegnante not found"));
+        var corso = courseRepository.findByCodiceCorso(codiceCorso)
+                .orElseThrow(() -> new ResourceNotFoundException("corso not found"));
 
-                if(corso.getTeacher() != null){
-                    throw new BusinessRuleException("Il corso è già assegnato a un insegnante");
-                }
-
-                corso.setTeacher(insegnante);
-                insegnante.getCourses().add(corso);
-
-            } else {
-                throw new ResourceNotFoundException("corso not found");
-            }
-        } else {
-            throw new ResourceNotFoundException("insegnante not found");
+        if (corso.getTeacher() != null) {
+            throw new BusinessRuleException("Il corso è già assegnato a un insegnante");
         }
+
+        corso.setTeacher(insegnante);
+        insegnante.getCourses().add(corso);
     }
 }

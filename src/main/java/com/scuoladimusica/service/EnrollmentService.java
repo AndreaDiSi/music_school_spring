@@ -38,74 +38,50 @@ public class EnrollmentService {
 
     @Transactional
     public EnrollmentResponse enrollStudent(String matricola, String codiceCorso, int anno) {
+        var studente = studentRepository.findByMatricola(matricola)
+                .orElseThrow(() -> new ResourceNotFoundException("studente not found"));
+        var corso = courseRepository.findByCodiceCorso(codiceCorso)
+                .orElseThrow(() -> new ResourceNotFoundException("corso not found"));
 
-        if(studentRepository.existsByMatricola(matricola)){
-            var studente = studentRepository.findByMatricola(matricola).get();
-
-            if(courseRepository.existsByCodiceCorso(codiceCorso)){
-                var corso = courseRepository.findByCodiceCorso(codiceCorso).get();
-
-                if(enrollmentRepository.existsByStudentMatricolaAndCourseCodiceCorso(matricola, codiceCorso)){
-                    throw new DuplicateResourceException("Studente already in corso");
-                }
-
-                var enrollment = Enrollment.builder()
-                        .student(studente)
-                        .course(corso)
-                        .annoIscrizione(anno)
-                        .votoFinale(null).build();
-
-                enrollmentRepository.save(enrollment);
-
-                return enrollmentMapper.toResponse(enrollment);
-
-            } else {
-                throw new ResourceNotFoundException("corso not found");
-            }
-        } else {
-            throw new ResourceNotFoundException("studente not found");
+        if (enrollmentRepository.existsByStudentMatricolaAndCourseCodiceCorso(matricola, codiceCorso)) {
+            throw new DuplicateResourceException("Studente already in corso");
         }
+
+        var enrollment = Enrollment.builder()
+                .student(studente)
+                .course(corso)
+                .annoIscrizione(anno)
+                .votoFinale(null).build();
+
+        enrollmentRepository.save(enrollment);
+
+        return enrollmentMapper.toResponse(enrollment);
     }
 
     @Transactional
     public EnrollmentResponse registerVote(String matricola, String codiceCorso, int voto) {
+        var enrollment = enrollmentRepository.findByStudentMatricolaAndCourseCodiceCorso(matricola, codiceCorso)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment non trovato"));
 
-        if(enrollmentRepository.existsByStudentMatricolaAndCourseCodiceCorso(matricola, codiceCorso)){
-            try {
-                var enrollment = enrollmentRepository.findByStudentMatricolaAndCourseCodiceCorso(matricola, codiceCorso).get();
-                if(voto >= 18 && voto <= 30){
-                    enrollment.setVotoFinale(voto);
-                    return enrollmentMapper.toResponse(enrollment);
-                } else {
-                    throw new BusinessRuleException("voto non può essere minore di 18 o maggiore di 30");
-                }
-            } catch (ResourceNotFoundException e) {
-                throw new ResourceNotFoundException("Enrollment non trovato");
-            }
+        if (voto >= 18 && voto <= 30) {
+            enrollment.setVotoFinale(voto);
+            return enrollmentMapper.toResponse(enrollment);
         } else {
-            throw new ResourceNotFoundException("enrollment non trovato");
+            throw new BusinessRuleException("voto non può essere minore di 18 o maggiore di 30");
         }
     }
 
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> getEnrollmentsByStudent(String matricola) {
-
-        if(studentRepository.existsByMatricola(matricola)){
-            var student = studentRepository.findByMatricola(matricola).get();
-            var enrollments = enrollmentRepository.findByStudentId(student.getId()) ;
-            return enrollmentMapper.toEnrollmentResponses(enrollments);
-        } else {
-            throw new ResourceNotFoundException("studente not found");
-        }
+        var student = studentRepository.findByMatricola(matricola)
+                .orElseThrow(() -> new ResourceNotFoundException("studente not found"));
+        return enrollmentMapper.toEnrollmentResponses(enrollmentRepository.findByStudentId(student.getId()));
     }
 
     @Transactional(readOnly = true)
     public List<EnrollmentResponse> getEnrollmentsByCourse(String codiceCorso) {
-        if(courseRepository.existsByCodiceCorso(codiceCorso)){
-            var course = courseRepository.findByCodiceCorso(codiceCorso).get();
-            return enrollmentMapper.toEnrollmentResponses(enrollmentRepository.findByCourseId(course.getId()));
-        } else {
-            throw new ResourceNotFoundException("corso not found");
-        }
+        var course = courseRepository.findByCodiceCorso(codiceCorso)
+                .orElseThrow(() -> new ResourceNotFoundException("corso not found"));
+        return enrollmentMapper.toEnrollmentResponses(enrollmentRepository.findByCourseId(course.getId()));
     }
 }
