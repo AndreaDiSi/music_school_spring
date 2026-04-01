@@ -59,8 +59,7 @@ public class Instrument {
      * Un prestito è attivo quando dataFine è null.
      */
     public boolean isDisponibile() {
-    // nessun prestito attivo (dataFine == null) → non disponibile
-        var isDisponibile = loans.stream().noneMatch(l -> l.getDataFine() == null);
-        return isDisponibile;
+        // nessun prestito attivo (dataFine == null) → non disponibile
+        return loans.stream().noneMatch(l -> l.getDataFine() == null);
     }
 }

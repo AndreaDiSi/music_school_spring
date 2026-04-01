@@ -8,7 +8,6 @@ import com.scuoladimusica.model.dto.request.InstrumentRequest;
 import com.scuoladimusica.model.dto.response.InstrumentResponse;
 import com.scuoladimusica.model.dto.response.LoanResponse;
 import com.scuoladimusica.model.entity.*;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -254,9 +253,9 @@ class InstrumentServiceTest {
 
             dati.creaSecondoStudente();
 
+            LocalDate dataInizio = LocalDate.of(2026, 3, 5);
             assertThrows(BusinessRuleException.class,
-                    () -> instrumentService.loanToStudent(
-                            "S001", "M002", LocalDate.of(2026, 3, 5)),
+                    () -> instrumentService.loanToStudent("S001", "M002", dataInizio),
                     "Strumento gia' in prestito deve lanciare BusinessRuleException");
         }
 
@@ -265,9 +264,9 @@ class InstrumentServiceTest {
         void prestaStrumento_strumentoNonTrovato() {
             dati.creaStudentePredefinito();
 
+            LocalDate dataInizio = LocalDate.of(2026, 3, 1);
             assertThrows(ResourceNotFoundException.class,
-                    () -> instrumentService.loanToStudent(
-                            "INESISTENTE", "M001", LocalDate.of(2026, 3, 1)));
+                    () -> instrumentService.loanToStudent("INESISTENTE", "M001", dataInizio));
         }
 
         @Test
@@ -275,9 +274,9 @@ class InstrumentServiceTest {
         void prestaStrumento_studenteNonTrovato() {
             dati.creaStrumentoPredefinito();
 
+            LocalDate dataInizio = LocalDate.of(2026, 3, 1);
             assertThrows(ResourceNotFoundException.class,
-                    () -> instrumentService.loanToStudent(
-                            "S001", "INESISTENTE", LocalDate.of(2026, 3, 1)));
+                    () -> instrumentService.loanToStudent("S001", "INESISTENTE", dataInizio));
         }
     }
 
@@ -314,9 +313,9 @@ class InstrumentServiceTest {
         void restituisciStrumento_nonInPrestito_errore() {
             dati.creaStrumentoPredefinito();
 
+            LocalDate data = LocalDate.of(2026, 3, 15);
             assertThrows(BusinessRuleException.class,
-                    () -> instrumentService.returnInstrument(
-                            "S001", LocalDate.of(2026, 3, 15)),
+                    () -> instrumentService.returnInstrument("S001", data),
                     "Strumento non in prestito deve lanciare BusinessRuleException");
         }
 
@@ -327,18 +326,18 @@ class InstrumentServiceTest {
             Student studente = dati.creaStudentePredefinito();
             dati.creaPrestito(strumento, studente, LocalDate.of(2026, 3, 10));
 
+            LocalDate dataRestituzione = LocalDate.of(2026, 3, 1);
             assertThrows(BusinessRuleException.class,
-                    () -> instrumentService.returnInstrument(
-                            "S001", LocalDate.of(2026, 3, 1)),
+                    () -> instrumentService.returnInstrument("S001", dataRestituzione),
                     "Data restituzione prima della data inizio deve lanciare BusinessRuleException");
         }
 
         @Test
         @DisplayName("Restituisci strumento non trovato - deve lanciare ResourceNotFoundException")
         void restituisciStrumento_nonTrovato() {
+            LocalDate data = LocalDate.of(2026, 3, 15);
             assertThrows(ResourceNotFoundException.class,
-                    () -> instrumentService.returnInstrument(
-                            "INESISTENTE", LocalDate.of(2026, 3, 15)));
+                    () -> instrumentService.returnInstrument("INESISTENTE", data));
         }
 
         @Test

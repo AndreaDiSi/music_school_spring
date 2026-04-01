@@ -9,7 +9,6 @@ import com.scuoladimusica.model.dto.response.CourseResponse;
 import com.scuoladimusica.model.dto.response.TeacherResponse;
 import com.scuoladimusica.model.entity.Livello;
 import com.scuoladimusica.model.entity.Teacher;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

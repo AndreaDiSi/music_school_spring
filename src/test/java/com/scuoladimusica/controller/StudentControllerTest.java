@@ -5,7 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.scuoladimusica.TestDataFactory;
 import com.scuoladimusica.model.dto.request.StudentRequest;
 import com.scuoladimusica.model.entity.*;
-import com.scuoladimusica.repository.EnrollmentRepository;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -35,8 +35,6 @@ class StudentControllerTest {
     @Autowired
     private TestDataFactory dati;
 
-    @Autowired
-    private EnrollmentRepository enrollmentRepository;
 
     private final ObjectMapper mapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());

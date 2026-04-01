@@ -36,15 +36,13 @@ class EnrollmentServiceTest {
     @DisplayName("Iscrizione Studente a Corso")
     class IscrizioneStudente {
 
-        private Student studente;
         private Teacher insegnante;
-        private Course corso;
 
         @BeforeEach
         void preparaDati() {
-            studente = dati.creaStudentePredefinito();
+            dati.creaStudentePredefinito();
             insegnante = dati.creaInsegnantePredefinito();
-            corso = dati.creaCorsoPredefinito(insegnante);
+            dati.creaCorsoPredefinito(insegnante);
         }
 
         @Test
@@ -76,7 +74,7 @@ class EnrollmentServiceTest {
         @Test
         @DisplayName("Iscrivi lo stesso studente a piu' corsi - successo")
         void iscriviStudente_piuCorsi_successo() {
-            Course corso2 = dati.creaCorsoOnline(insegnante);
+            dati.creaCorsoOnline(insegnante);
 
             enrollmentService.enrollStudent("M001", "C001", 2026);
             EnrollmentResponse response2 = enrollmentService.enrollStudent("M001", "C002", 2026);
@@ -88,7 +86,7 @@ class EnrollmentServiceTest {
         @Test
         @DisplayName("Iscrivi piu' studenti allo stesso corso - successo")
         void iscriviPiuStudenti_stessoCorso() {
-            Student studente2 = dati.creaSecondoStudente();
+            dati.creaSecondoStudente();
 
             EnrollmentResponse resp1 = enrollmentService.enrollStudent("M001", "C001", 2026);
             EnrollmentResponse resp2 = enrollmentService.enrollStudent("M002", "C001", 2026);
@@ -233,7 +231,7 @@ class EnrollmentServiceTest {
             dati.creaStudentePredefinito();
             Teacher insegnante = dati.creaInsegnantePredefinito();
             dati.creaCorsoPredefinito(insegnante);
-            Course corso2 = dati.creaCorsoOnline(insegnante);
+            dati.creaCorsoOnline(insegnante);
 
             enrollmentService.enrollStudent("M001", "C001", 2026);
             enrollmentService.enrollStudent("M001", "C002", 2026);

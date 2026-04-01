@@ -9,6 +9,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -81,29 +84,16 @@ class TeacherControllerTest {
                     .andExpect(jsonPath("$.anniEsperienza").value(15));
         }
 
-        @Test
-        @WithMockUser(roles = "TEACHER")
-        @DisplayName("L'insegnante non puo' creare altri insegnanti e riceve 403 Forbidden")
-        void insegnanteCreaInsegnante_403() throws Exception {
+        @ParameterizedTest
+        @ValueSource(strings = {"TEACHER", "STUDENT"})
+        @DisplayName("Utenti non ADMIN non possono creare insegnanti e ricevono 403 Forbidden")
+        void nonAdminCreaInsegnante_403(String role) throws Exception {
             TeacherRequest request = new TeacherRequest(
                     "I001", "VRDLGU80A01H501Z", "Luigi", "Verdi",
                     LocalDate.of(1980, 1, 1), null, 2500.0, "Pianoforte", 15);
 
             mockMvc.perform(post("/api/teachers")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(mapper.writeValueAsString(request)))
-                    .andExpect(status().isForbidden());
-        }
-
-        @Test
-        @WithMockUser(roles = "STUDENT")
-        @DisplayName("Lo studente non puo' creare insegnanti e riceve 403 Forbidden")
-        void studenteCreaInsegnante_403() throws Exception {
-            TeacherRequest request = new TeacherRequest(
-                    "I001", "VRDLGU80A01H501Z", "Luigi", "Verdi",
-                    LocalDate.of(1980, 1, 1), null, 2500.0, "Pianoforte", 15);
-
-            mockMvc.perform(post("/api/teachers")
+                            .with(user("user").roles(role))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(mapper.writeValueAsString(request)))
                     .andExpect(status().isForbidden());

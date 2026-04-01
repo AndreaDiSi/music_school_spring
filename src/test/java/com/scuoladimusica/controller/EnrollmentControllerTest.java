@@ -10,6 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +21,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -165,34 +168,24 @@ class EnrollmentControllerTest {
             corso = dati.creaCorsoPredefinito(insegnante);
         }
 
-        @Test
-        @WithMockUser(roles = "TEACHER")
-        @DisplayName("L'insegnante registra un voto con successo e riceve 200 OK")
-        void insegnanteRegistraVoto_200() throws Exception {
+        @ParameterizedTest
+        @CsvSource({
+            "TEACHER, 28",
+            "TEACHER, 30",
+            "ADMIN, 28"
+        })
+        @DisplayName("Registra voto con successo - riceve 200 OK")
+        void registraVoto_200(String role, int voto) throws Exception {
             dati.creaIscrizione(studente, corso, 2026);
 
-            VoteRequest request = new VoteRequest(28);
+            VoteRequest request = new VoteRequest(voto);
 
             mockMvc.perform(post("/api/enrollments/M001/C001/vote")
+                            .with(user("user").roles(role))
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(mapper.writeValueAsString(request)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.votoFinale").value(28));
-        }
-
-        @Test
-        @WithMockUser(roles = "TEACHER")
-        @DisplayName("L'insegnante registra il voto massimo 30 con successo e riceve 200 OK")
-        void insegnanteRegistraVotoMassimo_200() throws Exception {
-            dati.creaIscrizione(studente, corso, 2026);
-
-            VoteRequest request = new VoteRequest(30);
-
-            mockMvc.perform(post("/api/enrollments/M001/C001/vote")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(mapper.writeValueAsString(request)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.votoFinale").value(30));
+                    .andExpect(jsonPath("$.votoFinale").value(voto));
         }
 
         @Test
@@ -212,22 +205,8 @@ class EnrollmentControllerTest {
                     .andExpect(jsonPath("$.codiceCorso").value("C001"));
         }
 
-        @Test
-        @WithMockUser(roles = "ADMIN")
-        @DisplayName("L'admin registra un voto con successo e riceve 200 OK")
-        void adminRegistraVoto_200() throws Exception {
-            dati.creaIscrizione(studente, corso, 2026);
 
-            VoteRequest request = new VoteRequest(28);
-
-            mockMvc.perform(post("/api/enrollments/M001/C001/vote")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(mapper.writeValueAsString(request)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.votoFinale").value(28));
-        }
-
-        @Test
+@Test
         @WithMockUser(roles = "STUDENT")
         @DisplayName("Lo studente non puo' registrare voti e riceve 403 Forbidden")
         void studenteRegistraVoto_403() throws Exception {
