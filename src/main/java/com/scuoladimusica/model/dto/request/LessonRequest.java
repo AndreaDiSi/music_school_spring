@@ -4,8 +4,6 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-import com.scuoladimusica.model.entity.Course;
-
 public record LessonRequest(
         @Positive(message = "Il numero lezione deve essere positivo")
         int numero,

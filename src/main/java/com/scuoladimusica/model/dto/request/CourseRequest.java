@@ -2,9 +2,6 @@ package com.scuoladimusica.model.dto.request;
 
 import com.scuoladimusica.model.entity.Livello;
 import jakarta.validation.constraints.*;
-import lombok.Data;
-import lombok.Setter;
-
 import java.time.LocalDate;
 
 public record CourseRequest(

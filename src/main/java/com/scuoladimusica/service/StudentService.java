@@ -20,13 +20,19 @@ import java.util.List;
 @Transactional
 public class StudentService {
 
-    @Autowired
+    private static final String STUDENTE_NOT_FOUND = "Studente with this matricola not found: ";
+
     private StudentRepository studentRepository;
 
-    @Autowired
     private EnrollmentRepository enrollmentRepository;
 
     private StudentMapper studentMapper = new StudentMapper();
+
+    @Autowired
+    public StudentService(StudentRepository studentRepository, EnrollmentRepository enrollmentRepository) {
+        this.studentRepository = studentRepository;
+        this.enrollmentRepository = enrollmentRepository;
+    }
 
     public StudentResponse createStudent(StudentRequest request) {
 
@@ -51,12 +57,9 @@ public class StudentService {
 
     @Transactional(readOnly = true)
     public StudentResponse getStudentByMatricola(String matricola) {
-        var studente = studentRepository.findByMatricola(matricola);
-        if(studente.isPresent()){
-            return studentMapper.toResponse(studente.get());
-        } else {
-            throw new ResourceNotFoundException("Studente with this matricola not found: " + matricola);
-        }
+        var studente = studentRepository.findByMatricola(matricola)
+                .orElseThrow(() -> new ResourceNotFoundException(STUDENTE_NOT_FOUND + matricola));
+        return studentMapper.toResponse(studente);
     }
 
     @Transactional(readOnly = true)
@@ -72,7 +75,7 @@ public class StudentService {
     @Transactional
     public StudentResponse updateStudent(String matricola, StudentRequest request) {
         var studente = studentRepository.findByMatricola(matricola)
-                .orElseThrow(() -> new ResourceNotFoundException("Studente with this matricola not found: " + matricola));
+                .orElseThrow(() -> new ResourceNotFoundException(STUDENTE_NOT_FOUND + matricola));
 
         studente.setNome(request.nome());
         studente.setCognome(request.cognome());
@@ -84,14 +87,14 @@ public class StudentService {
 
     public void deleteStudent(String matricola) {
         var studente = studentRepository.findByMatricola(matricola)
-                .orElseThrow(() -> new ResourceNotFoundException("Studente with this matricola not found: " + matricola));
+                .orElseThrow(() -> new ResourceNotFoundException(STUDENTE_NOT_FOUND + matricola));
         studentRepository.delete(studente);
     }
 
     @Transactional(readOnly = true)
     public StudentReportResponse getStudentReport(String matricola) {
         var studente = studentRepository.findByMatricola(matricola)
-                .orElseThrow(() -> new ResourceNotFoundException("Studente with this matricola not found: " + matricola));
+                .orElseThrow(() -> new ResourceNotFoundException(STUDENTE_NOT_FOUND + matricola));
 
         var enrollments = enrollmentRepository.findByStudentId(studente.getId());
 

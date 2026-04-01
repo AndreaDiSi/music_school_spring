@@ -2,6 +2,7 @@ package com.scuoladimusica.security;
 
 import com.scuoladimusica.security.jwt.AuthEntryPointJwt;
 import com.scuoladimusica.security.jwt.AuthTokenFilter;
+import com.scuoladimusica.security.jwt.JwtUtils;
 import com.scuoladimusica.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,15 +24,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
-    @Autowired
     private UserDetailsServiceImpl userDetailsService;
 
-    @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
+
+    private JwtUtils jwtUtils;
+
+    @Autowired
+    public WebSecurityConfig(UserDetailsServiceImpl userDetailsService,
+            AuthEntryPointJwt unauthorizedHandler, JwtUtils jwtUtils) {
+        this.userDetailsService = userDetailsService;
+        this.unauthorizedHandler = unauthorizedHandler;
+        this.jwtUtils = jwtUtils;
+    }
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
+        return new AuthTokenFilter(jwtUtils, userDetailsService);
     }
 
     @Bean

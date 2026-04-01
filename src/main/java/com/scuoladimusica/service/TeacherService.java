@@ -19,13 +19,17 @@ import java.util.List;
 @Transactional
 public class TeacherService {
 
-    @Autowired
     private TeacherRepository teacherRepository;
 
-    @Autowired
     private CourseRepository courseRepository;
 
     private TeacherMapper teacherMapper = new TeacherMapper();
+
+    @Autowired
+    public TeacherService(TeacherRepository teacherRepository, CourseRepository courseRepository) {
+        this.teacherRepository = teacherRepository;
+        this.courseRepository = courseRepository;
+    }
 
     public TeacherResponse createTeacher(TeacherRequest request) {
 

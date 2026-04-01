@@ -17,8 +17,12 @@ import java.util.List;
 @RequestMapping("/api/teachers")
 public class TeacherController {
 
-    @Autowired
     private TeacherService teacherService;
+
+    @Autowired
+    public TeacherController(TeacherService teacherService) {
+        this.teacherService = teacherService;
+    }
 
     /**
      * TODO: POST /api/teachers - Creare un nuovo insegnante.

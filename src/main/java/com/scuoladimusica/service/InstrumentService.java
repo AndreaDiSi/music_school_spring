@@ -57,16 +57,9 @@ public class InstrumentService {
 
     @Transactional(readOnly = true)
     public InstrumentResponse getInstrumentByCode(String codiceStrumento) {
-        var strumento = instrumentRepository.findByCodiceStrumento(codiceStrumento);
-        if(strumento.isPresent()){
-            var s = strumento.get();
-            
-            return instrumentMapper.toResponse(s);
-            
-           
-        } else {
-            throw new ResourceNotFoundException("Strumento with this codice not found: " + codiceStrumento);
-        }
+        var strumento = instrumentRepository.findByCodiceStrumento(codiceStrumento)
+                .orElseThrow(() -> new ResourceNotFoundException("Strumento with this codice not found: " + codiceStrumento));
+        return instrumentMapper.toResponse(strumento);
     }
 
     @Transactional(readOnly = true)
@@ -100,37 +93,26 @@ public class InstrumentService {
     @Transactional
     public LoanResponse loanToStudent(String codiceStrumento, String matricolaStudente, LocalDate dataInizio) {
 
-        if(instrumentRepository.existsByCodiceStrumento(codiceStrumento)){
-            if(studentRepository.existsByMatricola(matricolaStudente)){
-                var strumento = instrumentRepository.findByCodiceStrumento(codiceStrumento).get();
-                var studente = studentRepository.findByMatricola(matricolaStudente).get();
+        var strumento = instrumentRepository.findByCodiceStrumento(codiceStrumento)
+                .orElseThrow(() -> new ResourceNotFoundException("strumento not found"));
+        var studente = studentRepository.findByMatricola(matricolaStudente)
+                .orElseThrow(() -> new ResourceNotFoundException("studente not found"));
 
-                if(!strumento.isDisponibile()){
-                    throw new BusinessRuleException("Lo strumento è già in prestito");
-                }
-
-                var loan = Loan.builder()
-                        .instrument(strumento)
-                        .student(studente)
-                        .dataInizio(dataInizio)
-                        .dataFine(null)
-                        .build();
-
-                
-                
-                     
-                var savedLoan = loanRepository.save(loan);
-                strumento.getLoans().add(savedLoan);  // isDisponibile() lo calcola da qui    
-                 
-                
-                return loanMapper.toResponse(savedLoan);
-
-            } else {
-                throw new ResourceNotFoundException("studente not found");
-            }
-        } else {
-            throw new ResourceNotFoundException("strumento not found");
+        if (!strumento.isDisponibile()) {
+            throw new BusinessRuleException("Lo strumento è già in prestito");
         }
+
+        var loan = Loan.builder()
+                .instrument(strumento)
+                .student(studente)
+                .dataInizio(dataInizio)
+                .dataFine(null)
+                .build();
+
+        var savedLoan = loanRepository.save(loan);
+        strumento.getLoans().add(savedLoan);
+
+        return loanMapper.toResponse(savedLoan);
     }
 
 }

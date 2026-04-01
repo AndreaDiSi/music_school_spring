@@ -18,8 +18,12 @@ public class DataLoader implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(DataLoader.class);
 
-    @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    public DataLoader(RoleRepository roleRepository) {
+        this.roleRepository = roleRepository;
+    }
 
     @Override
     public void run(String... args) {

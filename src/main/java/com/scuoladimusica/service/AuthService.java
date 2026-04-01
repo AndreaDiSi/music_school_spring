@@ -27,20 +27,25 @@ import java.util.Set;
 @Service
 public class AuthService {
 
-    @Autowired
     private AuthenticationManager authenticationManager;
 
-    @Autowired
     private UserRepository userRepository;
 
-    @Autowired
     private RoleRepository roleRepository;
 
-    @Autowired
     private PasswordEncoder encoder;
 
-    @Autowired
     private JwtUtils jwtUtils;
+
+    @Autowired
+    public AuthService(AuthenticationManager authenticationManager, UserRepository userRepository,
+            RoleRepository roleRepository, PasswordEncoder encoder, JwtUtils jwtUtils) {
+        this.authenticationManager = authenticationManager;
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.encoder = encoder;
+        this.jwtUtils = jwtUtils;
+    }
 
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(

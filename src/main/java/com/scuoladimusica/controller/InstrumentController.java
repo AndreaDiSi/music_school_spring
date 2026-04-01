@@ -19,8 +19,12 @@ import java.util.List;
 @RequestMapping("/api/instruments")
 public class InstrumentController {
 
-    @Autowired
     private InstrumentService instrumentService;
+
+    @Autowired
+    public InstrumentController(InstrumentService instrumentService) {
+        this.instrumentService = instrumentService;
+    }
 
     /**
      * TODO: POST /api/instruments - Creare un nuovo strumento.

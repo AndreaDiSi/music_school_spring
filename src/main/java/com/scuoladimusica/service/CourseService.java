@@ -25,20 +25,25 @@ import java.util.List;
 @Transactional
 public class CourseService {
 
-    @Autowired
     private CourseRepository courseRepository;
 
-    @Autowired
     private LessonRepository lessonRepository;
 
-    @Autowired
     private InstrumentRepository instrumentRepository;
 
-    @Autowired
     private CourseMapper courseMapper;
 
-    @Autowired
     private LessonMapper lessonMapper;
+
+    @Autowired
+    public CourseService(CourseRepository courseRepository, LessonRepository lessonRepository,
+            InstrumentRepository instrumentRepository, CourseMapper courseMapper, LessonMapper lessonMapper) {
+        this.courseRepository = courseRepository;
+        this.lessonRepository = lessonRepository;
+        this.instrumentRepository = instrumentRepository;
+        this.courseMapper = courseMapper;
+        this.lessonMapper = lessonMapper;
+    }
 
     @Transactional
     public CourseResponse createCourse(CourseRequest request) {

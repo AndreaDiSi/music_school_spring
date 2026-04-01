@@ -19,17 +19,22 @@ import java.util.List;
 @Transactional
 public class EnrollmentService {
 
-    @Autowired
     private EnrollmentRepository enrollmentRepository;
 
-    @Autowired
     private StudentRepository studentRepository;
 
-    @Autowired
     private CourseRepository courseRepository;
 
-    @Autowired
     private EnrollmentMapper enrollmentMapper;
+
+    @Autowired
+    public EnrollmentService(EnrollmentRepository enrollmentRepository, StudentRepository studentRepository,
+            CourseRepository courseRepository, EnrollmentMapper enrollmentMapper) {
+        this.enrollmentRepository = enrollmentRepository;
+        this.studentRepository = studentRepository;
+        this.courseRepository = courseRepository;
+        this.enrollmentMapper = enrollmentMapper;
+    }
 
     @Transactional
     public EnrollmentResponse enrollStudent(String matricola, String codiceCorso, int anno) {

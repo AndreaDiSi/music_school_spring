@@ -19,42 +19,25 @@ import java.util.List;
 @RequestMapping("/api/courses")
 public class CourseController {
 
-    @Autowired
     private CourseService courseService;
 
-    /**
-     * TODO: POST /api/courses - Creare un nuovo corso.
-     *
-     * Requisiti:
-     * - Solo ADMIN può creare corsi
-     * - Validare la request con @Valid
-     * - Restituire 201 CREATED con la CourseResponse
-     */
+    @Autowired
+    public CourseController(CourseService courseService) {
+        this.courseService = courseService;
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CourseResponse> createCourse(@Valid @RequestBody CourseRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(courseService.createCourse(request));
     }
 
-    /**
-     * TODO: GET /api/courses - Recuperare tutti i corsi.
-     *
-     * Requisiti:
-     * - Tutti gli utenti autenticati possono vedere i corsi
-     * - Restituire 200 OK con la lista
-     */
     @GetMapping
     public ResponseEntity<List<CourseResponse>> getAllCourses() {
         return ResponseEntity.ok(courseService.getAllCourses());
     }
 
-    /**
-     * TODO: GET /api/courses/online - Recuperare solo i corsi online.
-     *
-     * Requisiti:
-     * - Tutti gli utenti autenticati
-     * - Restituire 200 OK con la lista filtrata
-     */
+
     @GetMapping("/online")
     public ResponseEntity<List<CourseResponse>> getOnlineCourses() {
         return ResponseEntity.ok(courseService.getOnlineCourses());

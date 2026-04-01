@@ -17,8 +17,12 @@ import java.util.List;
 @RequestMapping("/api/enrollments")
 public class EnrollmentController {
 
-    @Autowired
     private EnrollmentService enrollmentService;
+
+    @Autowired
+    public EnrollmentController(EnrollmentService enrollmentService) {
+        this.enrollmentService = enrollmentService;
+    }
 
     /**
      * TODO: POST /api/enrollments - Iscrivere uno studente a un corso.
